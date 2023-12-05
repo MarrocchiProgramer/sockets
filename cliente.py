@@ -1,32 +1,55 @@
+# Cliente
 import socket
-
 def main():
-  # Creamos un socket
-  client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    host = "localhost"
+    port = 8080
 
-  # Conectamos al servidor
-  client_socket.connect(("localhost", 8080))
+    # Creamos el socket
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-  # Iniciamos un bucle
-  while True:
+    # Nos conectamos al servidor
+    sock.connect((host, port))
 
-    # Recibimos la respuesta del servidor
-    respuesta = client_socket.recv(1024).decode()
+    # Recibimos la contraseña del servidor
+    contraseña = sock.recv(1024).decode()
 
-    # Si la respuesta es "Conexión iniciada", entonces es el mensaje de bienvenida
-    if respuesta == "Conexión iniciada":
-      # El servidor ya nos ha enviado el número secreto
-      # No necesitamos introducir una respuesta
-      pass
+    # Comenzamos el juego
+    intentos = 1
+
+    
+    respuesta = eval(input("Adivina un número: "))
+
+    # Mientras no hayamos adivinado la contraseña o no hayamos agotado los intentos
+    while contraseña != respuesta and intentos <= 15:
+
+        # Solicitamos la respuesta del usuario
+        respuesta = input("Adivina un número: ")
+
+        # Enviamos la respuesta al servidor
+        sock.sendall(respuesta.encode())
+
+        # Recibimos el mensaje del servidor
+        mensaje = sock.recv(1024).decode()
+
+        # Imprimimos el mensaje del servidor
+        print(mensaje)
+
+        # Incrementamos el número de intentos
+        intentos += 1
+
+    # Si adivinamos la contraseña
+    if contraseña == respuesta:
+
+        # Imprimimos un mensaje de victoria
+        print("Has ganado!")
+
+    # Si agotamos los intentos
     else:
-      # La respuesta es una respuesta del juego
-      # Introducimos la respuesta en el juego
-      print(respuesta)
-      respuesta = input("Introduce tu respuesta: ")
-      client_socket.send(respuesta.encode())
 
-  # Cerramos la conexión
-  client_socket.close()
+        # Imprimimos un mensaje de derrota
+        print("Has perdido!")
+
+    sock.close()
 
 if __name__ == "__main__":
-  main()
+    main()
